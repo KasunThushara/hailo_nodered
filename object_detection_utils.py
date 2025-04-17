@@ -111,16 +111,16 @@ class ObjectDetectionUtils:
 
     def draw_detections(self, detections: dict, image: np.ndarray, min_score: float = 0.45, scale_factor: float = 1):
         """
-        Print detections details (bbox, class name, score) to the console without drawing on the image.
+        Draw detections on the image.
 
         Args:
             detections (dict): Detection results containing 'detection_boxes', 'detection_classes', 'detection_scores', and 'num_detections'.
-            image (np.ndarray): Image to process (not used for drawing here).
+            image (np.ndarray): Image to draw on.
             min_score (float): Minimum score threshold. Defaults to 0.45.
             scale_factor (float): Scale factor for coordinates. Defaults to 1.
 
         Returns:
-            np.ndarray: Original image (without detections drawn).
+            np.ndarray: Image with detections drawn.
         """
         boxes = detections['detection_boxes']
         classes = detections['detection_classes']
@@ -133,19 +133,11 @@ class ObjectDetectionUtils:
 
         for idx in range(detections['num_detections']):
             if scores[idx] >= min_score:
-                # Get class name and score
-                class_name = self.labels[classes[idx]]
-                score = scores[idx] * 100.0
-
-                # Get bounding box
+                color = generate_color(classes[idx])
                 scaled_box = self.denormalize_and_rm_pad(boxes[idx], size, padding_length, img_height, img_width)
-                ymin, xmin, ymax, xmax = scaled_box
+                self.draw_detection(image, scaled_box, classes[idx], scores[idx] * 100.0, color, scale_factor)
 
-                # Print the details of bbox, class name, and confidence score
-                print(f"Class: {class_name}, Confidence: {score:.2f}%, BBox: [{ymin}, {xmin}, {ymax}, {xmax}]")
-
-        return image  # Return the original image without drawing
-
+        return image
         
     def extract_detections(self, input_data: list, threshold: float = 0.5) -> dict:
         """
